@@ -86,18 +86,20 @@ function rowHtml(r) {
   return '<div class="row ' + r.status + '">' + parts.join('') + '</div>';
 }
 
-const PILL_MAX_NAMES = 3;
+const PILL_MAX_ROWS = 4;
 
-// One agent: its full row. Several: "● api claude · web codex +2 · Working".
+// One agent: its full row. Several: one compact line each (no title), capped.
 function pillHtml(v) {
   if (v.rows.length === 1) return rowHtml(v.rows[0]);
-  const names = v.rows.slice(0, PILL_MAX_NAMES).map((r) =>
-    '<span class="project">' + esc(trunc(r.name, 20)) + '</span><span class="agent">' + esc(r.agent) + '</span>'
-  ).join('<span class="sep">·</span>');
-  const more = v.rows.length - PILL_MAX_NAMES;
-  return '<div class="row working">' + dot('working') + names +
-    (more > 0 ? '<span class="agent">+' + more + '</span>' : '') +
-    '<span class="sep">·</span><span class="status">Working</span></div>';
+  const lines = v.rows.slice(0, PILL_MAX_ROWS).map((r) =>
+    '<div class="row working">' + dot('working') +
+    '<span class="project">' + esc(trunc(r.name, 24)) + '</span>' +
+    '<span class="agent">' + esc(r.agent) + '</span>' +
+    '<span class="meta">' + elapsed(r.since) + '</span></div>'
+  );
+  const more = v.rows.length - PILL_MAX_ROWS;
+  if (more > 0) lines.push('<div class="row"><span class="agent">+' + more + ' more working</span></div>');
+  return lines.join('');
 }
 
 // Transient message (e.g. jump with nothing to jump to); wins over the view.
