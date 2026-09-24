@@ -13,6 +13,7 @@ test('focus by path or query', () => {
   assert.deepEqual(parseUrl('agent-cursor://focus/w6:p4'), { cmd: 'focus', args: ['w6:p4'] });
   assert.deepEqual(parseUrl('agent-cursor://focus/w6%3Ap4'), { cmd: 'focus', args: ['w6:p4'] });
   assert.deepEqual(parseUrl('agent-cursor://focus?pane=w1:p2'), { cmd: 'focus', args: ['w1:p2'] });
+  assert.deepEqual(parseUrl('agent-cursor://focus/w6:pA'), { cmd: 'focus', args: ['w6:pA'] });
 });
 
 test('rejects unknown actions, bad panes, other schemes', () => {

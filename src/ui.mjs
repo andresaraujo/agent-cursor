@@ -100,8 +100,24 @@ function pillHtml(v) {
     '<span class="sep">·</span><span class="status">Working</span></div>';
 }
 
+// Transient message (e.g. jump with nothing to jump to); wins over the view.
+let flashText = '';
+let flashUntil = 0;
+
+function flash(text) {
+  flashText = text;
+  flashUntil = Date.now() + 1500;
+  paint();
+  setTimeout(paint, 1550);
+}
+
 function paint() {
   const pill = document.getElementById('pill');
+  if (Date.now() < flashUntil) {
+    pill.innerHTML = '<div class="row">' + dot('done') + '<span class="status">' + esc(flashText) + '</span></div>';
+    pill.style.opacity = '1';
+    return;
+  }
   if (current.mode === 'hidden') {
     pill.style.opacity = '0';
     return;

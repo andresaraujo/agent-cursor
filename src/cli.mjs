@@ -82,7 +82,7 @@ function control(msg) {
 async function report(promise) {
   const reply = await promise;
   if (!reply.ok) throw new Error(reply.error);
-  console.log(reply.focused ? `focused ${reply.focused}` : 'nothing blocked or done');
+  console.log(reply.focused ? `focused ${reply.focused}` : 'all quiet: nothing needs you');
 }
 
 const jump = () => report(control({ cmd: 'jump' }));
@@ -97,7 +97,11 @@ function url(raw) {
   return commands[cmd](...args);
 }
 
-const commands = { start, stop, toggle, status, jump, focus, url };
+async function targets() {
+  console.log(JSON.stringify(await control({ cmd: 'targets' }), null, 2));
+}
+
+const commands = { start, stop, toggle, status, jump, focus, url, targets };
 const cmd = commands[process.argv[2]];
 if (!cmd) {
   console.error('usage: run.sh start|stop|toggle|status|jump|focus <pane>|url <agent-cursor://…>');

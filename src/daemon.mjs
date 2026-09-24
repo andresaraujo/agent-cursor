@@ -5,7 +5,7 @@ import { listAgents, listTabs, readScreen, request, subscribe } from './herdr.mj
 import { openOverlay } from './overlay.mjs';
 import { blockedReason } from './prompt.mjs';
 import { CONTROL_SOCKET, acquireLock, detectTerminal, readConfig, releaseLock } from './runtime.mjs';
-import { hasUnseen, markSeen, nextExpiry, reconcile, view } from './state.mjs';
+import { hasUnseen, jumpTargets, markSeen, nextExpiry, reconcile, view } from './state.mjs';
 import { buildHtml } from './ui.mjs';
 import { isPaneId } from './url.mjs';
 
@@ -75,8 +75,8 @@ function syncCursorWatch() {
 }
 
 // --- Jump / focus ---------------------------------------------------------
-// Jump focuses the first blocked (then done) pane that isn't already focused,
-// so repeated presses cycle through them. Both bring the terminal forward.
+// Jump goes to what needs you (see jumpTargets), skipping the pane you're on so
+// repeated presses cycle. Both bring the terminal forward.
 
 async function focusPane(paneId) {
   await request('agent.focus', { target: paneId });
@@ -85,11 +85,14 @@ async function focusPane(paneId) {
 }
 
 async function jump() {
-  const candidates = view(state, Date.now()).rows.filter((r) => r.status !== 'working');
-  const target = candidates.find((r) => !state.get(r.id)?.focused) ?? candidates[0];
-  if (!target) return { ok: true, focused: null };
-  await focusPane(target.id);
-  return { ok: true, focused: target.id };
+  const targets = jumpTargets(state);
+  const target = targets.find((id) => !state.get(id)?.focused) ?? targets[0];
+  if (!target) {
+    overlay.eval(`flash(${JSON.stringify('All quiet')})`);
+    return { ok: true, focused: null };
+  }
+  await focusPane(target);
+  return { ok: true, focused: target };
 }
 
 overlay.on('hotkey', () => jump().catch((err) => log('jump failed:', err.message)));
@@ -99,6 +102,11 @@ overlay.on('hotkey', () => jump().catch((err) => log('jump failed:', err.message
 
 const COMMANDS = {
   jump,
+  targets: async () => ({
+    ok: true,
+    targets: jumpTargets(state),
+    rows: [...state.values()].filter((r) => r.status !== 'idle' || r.finishedAt),
+  }),
   focus: async ({ pane }) => {
     if (!isPaneId(pane)) throw new Error(`invalid pane id: ${pane}`);
     await focusPane(pane);

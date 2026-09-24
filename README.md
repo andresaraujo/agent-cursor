@@ -7,7 +7,7 @@ Herdr plugin: floating overlay near the cursor showing which agent panes are wor
 - Done rows stay until you move the mouse or focus the pane, then fade after 4s
 - Same-named panes disambiguated by tab (`lekey/2`); `herdr agent rename` wins
 - Hidden while herdr's terminal is frontmost (herdr already shows state there)
-- **⌃⌥J** jumps to the next blocked/done agent: focuses its pane and brings the terminal forward; press again to cycle
+- **⌃⌥J** jumps to what needs you, whether or not the overlay still shows it: blocked (longest waiting) → finished but not visited since (newest) → last finished. Focuses the pane, brings the terminal forward; press again to cycle. Nothing to do → "All quiet"
 
 ## Requirements
 
@@ -34,6 +34,7 @@ Starts automatically with the herdr server.
 ```sh
 herdr plugin action invoke local.agent-cursor.toggle
 sh bin/run.sh status     # daemon + current view
+sh bin/run.sh targets    # debug: jump order + tracked rows
 npm test
 ```
 
@@ -45,7 +46,7 @@ URL scheme (registered by `bin/install.sh`):
 
 | URL | Does |
 |---|---|
-| `agent-cursor://jump` | focus next blocked/done agent, bring terminal forward |
+| `agent-cursor://jump` | same as ⌃⌥J |
 | `agent-cursor://focus/w6:p4` | focus that pane (ids from `run.sh status`) |
 | `agent-cursor://toggle` · `start` · `stop` | overlay on/off |
 

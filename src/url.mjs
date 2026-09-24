@@ -6,7 +6,8 @@
 //   agent-cursor://toggle | start | stop
 
 export const SCHEME = 'agent-cursor:';
-const PANE_ID = /^w\d+:p\d+$/;
+// herdr ids aren't always decimal (e.g. w6:pA).
+const PANE_ID = /^w[0-9A-Za-z]+:p[0-9A-Za-z]+$/;
 const SIMPLE = new Set(['jump', 'toggle', 'start', 'stop']);
 
 // Returns { cmd, args } or throws with a user-facing message.

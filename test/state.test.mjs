@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { DONE_MS, hasUnseen, labels, markSeen, nextExpiry, reconcile, view } from '../src/state.mjs';
+import { DONE_MS, hasUnseen, jumpTargets, labels, markSeen, nextExpiry, reconcile, view } from '../src/state.mjs';
 
 const agent = (pane_id, agent_status, extra = {}) => ({
   pane_id,
@@ -100,4 +100,49 @@ test('title repeating project dropped, real title kept', () => {
   ], 0);
   assert.equal(s.get('w1:p1').title, '');
   assert.equal(s.get('w1:p2').title, 'Refactor auth');
+});
+
+test('jumpTargets: blocked first, then unvisited done newest first', () => {
+  let s = reconcile(new Map(), [
+    agent('w1:p1', 'working'), agent('w1:p2', 'working'), agent('w1:p3', 'working'), agent('w1:p4', 'working'),
+  ], 0);
+  s = reconcile(s, [
+    agent('w1:p1', 'done'), agent('w1:p2', 'blocked'), agent('w1:p3', 'working'), agent('w1:p4', 'working'),
+  ], 100);
+  s = reconcile(s, [
+    agent('w1:p1', 'done'), agent('w1:p2', 'blocked'), agent('w1:p3', 'blocked'), agent('w1:p4', 'idle'),
+  ], 200);
+  assert.deepEqual(jumpTargets(s), ['w1:p2', 'w1:p3', 'w1:p4', 'w1:p1']);
+});
+
+test('jumpTargets: unvisited survives overlay fade; visiting removes it', () => {
+  let s = reconcile(new Map(), [agent('w1:p1', 'working')], 0);
+  s = reconcile(s, [agent('w1:p1', 'idle')], 100);
+  s = markSeen(s, 200);
+  assert.equal(view(s, 200 + DONE_MS).mode, 'hidden');
+  assert.deepEqual(jumpTargets(s), ['w1:p1']); // still unvisited
+  s = reconcile(s, [agent('w1:p1', 'idle', { focused: true })], 10_000);
+  // Visited: only the fallback keeps it reachable.
+  assert.equal(s.get('w1:p1').visitedAt, 10_000);
+  assert.deepEqual(jumpTargets(s), ['w1:p1']);
+});
+
+test('jumpTargets: fallback is most recent finish, only when nothing else', () => {
+  let s = reconcile(new Map(), [agent('w1:p1', 'working'), agent('w1:p2', 'working')], 0);
+  s = reconcile(s, [agent('w1:p1', 'idle'), agent('w1:p2', 'working')], 100);
+  s = reconcile(s, [agent('w1:p1', 'idle'), agent('w1:p2', 'idle')], 200);
+  s = reconcile(s, [agent('w1:p1', 'idle', { focused: true }), agent('w1:p2', 'idle')], 300);
+  s = reconcile(s, [agent('w1:p1', 'idle'), agent('w1:p2', 'idle', { focused: true })], 400);
+  assert.deepEqual(jumpTargets(s), ['w1:p2']);
+});
+
+test('jumpTargets: herdr done from before startup counts as unvisited', () => {
+  const s = reconcile(new Map(), [agent('w1:p1', 'done'), agent('w1:p2', 'idle')], 0, { initial: true });
+  assert.deepEqual(jumpTargets(s), ['w1:p1']);
+  assert.equal(view(s, 0).mode, 'hidden');
+});
+
+test('jumpTargets: nothing → empty', () => {
+  const s = reconcile(new Map(), [agent('w1:p1', 'idle'), agent('w1:p2', 'working')], 0, { initial: true });
+  assert.deepEqual(jumpTargets(s), []);
 });

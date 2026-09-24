@@ -68,7 +68,9 @@ export function reconcile(prev, agents, now, { initial = false, tabs, reasons = 
       since: old && old.status === status ? old.since : now,
       finishedAt: old?.finishedAt ?? 0,
       seenAt: old?.seenAt ?? null,
+      visitedAt: old?.visitedAt ?? 0,
     };
+    if (old && !old.focused && row.focused) row.visitedAt = now;
     const wasActive = old ? ACTIVE.has(old.status) : false;
     // Finish on done, or on working→idle (herdr skips done for focused panes).
     // Unseen until the user moves the mouse or focuses the pane.
@@ -126,6 +128,24 @@ export function view(state, now) {
   for (const r of rows) counts[r.status]++;
   const mode = rows.length === 0 ? 'hidden' : counts.blocked || counts.done ? 'expanded' : 'pill';
   return { mode, counts, rows };
+}
+
+// Where "jump" should go, best first, independent of what the overlay shows:
+// blocked (longest waiting) → finished but not visited since (newest; includes
+// herdr "done" from before we started) → the most recently finished as fallback.
+export function jumpTargets(state) {
+  const rows = [...state.values()];
+  const blocked = rows.filter((r) => r.status === 'blocked').sort((a, b) => a.since - b.since);
+  const finishedAt = (r) => r.finishedAt || r.since;
+  const unvisited = rows
+    .filter((r) => r.status === 'done' || (r.finishedAt && !ACTIVE.has(r.status) && r.visitedAt < r.finishedAt))
+    .sort((a, b) => finishedAt(b) - finishedAt(a));
+  const targets = [...blocked, ...unvisited];
+  if (targets.length === 0) {
+    const last = rows.filter((r) => !ACTIVE.has(r.status) && r.finishedAt).sort((a, b) => b.finishedAt - a.finishedAt)[0];
+    if (last) targets.push(last);
+  }
+  return targets.map((r) => r.id);
 }
 
 // Next time the view changes on its own (a seen done row expiring), or null.
