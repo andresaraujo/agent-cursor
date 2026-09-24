@@ -1,0 +1,11 @@
+{
+  "name": "agent-cursor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Herdr plugin: cursor overlay showing agent pane states",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build:native": "sh native/build.sh"
+  }
+}

@@ -1,0 +1,28 @@
+id = "local.agent-cursor"
+name = "Agent Cursor"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Overlay near the cursor showing working/blocked/done agent panes"
+platforms = ["macos"]
+
+[[startup]]
+command = ["sh", "bin/run.sh", "start"]
+
+[[actions]]
+id = "toggle"
+title = "Agent Cursor: toggle overlay"
+contexts = ["workspace"]
+command = ["sh", "bin/run.sh", "toggle"]
+
+[[actions]]
+id = "jump"
+title = "Agent Cursor: jump to next blocked/done agent"
+contexts = ["workspace"]
+command = ["sh", "bin/run.sh", "jump"]
+
+[[actions]]
+id = "status"
+title = "Agent Cursor: status"
+contexts = ["workspace"]
+command = ["sh", "bin/run.sh", "status"]
+
