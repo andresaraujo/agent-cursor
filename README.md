@@ -49,6 +49,8 @@ URL scheme (registered by `bin/install.sh`):
 | `agent-cursor://focus/w6:p4` | focus that pane (ids from `run.sh status`) |
 | `agent-cursor://toggle` · `start` · `stop` | overlay on/off |
 
+leky: `action = "core.open-url"`, `args = { url = "agent-cursor://jump" }`; test with `leky action run core.open-url --args '{"url":"agent-cursor://jump"}'`.
+
 ```sh
 open agent-cursor://jump            # any launcher, leky, Raycast quicklink
 sh <plugin>/bin/run.sh jump         # same, skips LaunchServices (faster)

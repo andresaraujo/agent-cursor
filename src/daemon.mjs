@@ -4,7 +4,7 @@ import process from 'node:process';
 import { listAgents, listTabs, readScreen, request, subscribe } from './herdr.mjs';
 import { openOverlay } from './overlay.mjs';
 import { blockedReason } from './prompt.mjs';
-import { CONTROL_SOCKET, acquireLock, readConfig, releaseLock } from './runtime.mjs';
+import { CONTROL_SOCKET, acquireLock, detectTerminal, readConfig, releaseLock } from './runtime.mjs';
 import { hasUnseen, markSeen, nextExpiry, reconcile, view } from './state.mjs';
 import { buildHtml } from './ui.mjs';
 import { isPaneId } from './url.mjs';
@@ -17,9 +17,8 @@ if (!acquireLock()) process.exit(0);
 
 const log = (...args) => console.log(new Date().toISOString(), ...args);
 
-// Terminal app hosting herdr (inherited from the herdr server's environment).
 const config = readConfig();
-const TERMINAL_BUNDLE_ID = config.terminalBundleId ?? process.env.__CFBundleIdentifier ?? null;
+const TERMINAL_BUNDLE_ID = detectTerminal(config);
 
 let state = new Map();
 let initialized = false;
