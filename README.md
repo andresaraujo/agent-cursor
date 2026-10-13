@@ -4,7 +4,9 @@
 
 A small overlay follows your mouse and shows which agent panes are working, blocked or done. One hotkey (**⌃⌥J**) jumps straight to the agent waiting on you. Built as a plugin for [herdr](https://herdr.dev), a terminal workspace manager for AI coding agents.
 
-<!-- TODO screenshot: docs/screenshot.png (pill while working + expanded rows with a blocked agent) -->
+![Agent Cursor: a pill while agents work, expanded rows when one is blocked](docs/screenshot.png)
+
+<sub>Rendered from the real overlay UI with sample data (`docs/make-screenshot.mjs`).</sub>
 
 ## What it shows
 
