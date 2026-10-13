@@ -2,7 +2,7 @@
 
 **See which of your coding agents need you, without hunting through terminal panes.**
 
-A small overlay follows your mouse and shows which agent panes are working, blocked or done. One hotkey (**⌃⌥J**) jumps straight to the agent waiting on you. Built as a plugin for [herdr](https://herdr.dev), the terminal multiplexer for running many agents at once.
+A small overlay follows your mouse and shows which agent panes are working, blocked or done. One hotkey (**⌃⌥J**) jumps straight to the agent waiting on you. Built as a plugin for [herdr](https://herdr.dev), a terminal workspace manager for AI coding agents.
 
 <!-- TODO screenshot: docs/screenshot.png (pill while working + expanded rows with a blocked agent) -->
 
