@@ -1,7 +1,9 @@
 // Render the real overlay HTML (src/ui.mjs) with sample views into a demo page.
 // Usage: node docs/make-screenshot.mjs ./src/ui.mjs docs/demo.html, then screenshot it served over http.
 import { writeFileSync } from 'node:fs';
-const { buildHtml } = await import(process.argv[2]);
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+const { buildHtml } = await import(pathToFileURL(resolve(process.argv[2])).href);
 const now = Date.now();
 const views = {
   pill: { mode: 'pill', counts: { working: 2 }, rows: [
