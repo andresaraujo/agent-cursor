@@ -1,13 +1,19 @@
 # Agent Cursor
 
-Herdr plugin: floating overlay near the cursor showing which agent panes are working, blocked or done. Native window adapted from [Glimpse](https://github.com/HazAT/glimpse) (MIT).
+**See which of your coding agents need you, without hunting through terminal panes.**
 
-- Idle panes hidden; only working → single pill (names the agents)
-- Blocked or done → expands to rows; blocked shows what the agent is asking (`Bash: npm test`)
-- Done rows stay until you move the mouse or focus the pane, then fade after 4s
-- Same-named panes disambiguated by tab (`lekey/2`); `herdr agent rename` wins
-- Hidden while herdr's terminal is frontmost (herdr already shows state there)
-- **⌃⌥J** jumps to what needs you, whether or not the overlay still shows it: blocked (longest waiting) → finished but not visited since (newest) → last finished. Focuses the pane, brings the terminal forward; press again to cycle. Nothing to do → "All quiet"
+A small overlay follows your mouse and shows which agent panes are working, blocked or done. One hotkey (**⌃⌥J**) jumps straight to the agent waiting on you. Built as a plugin for [herdr](https://herdr.dev), the terminal multiplexer for running many agents at once.
+
+<!-- TODO screenshot: docs/screenshot.png (pill while working + expanded rows with a blocked agent) -->
+
+## What it shows
+
+- **Working:** a single small pill naming the agents. Idle panes stay hidden.
+- **Blocked:** expands to rows, showing what the agent is asking (`Bash: npm test`).
+- **Done:** rows stay until you move the mouse or focus the pane, then fade after 4s.
+- Hidden while herdr's own terminal is in front, since herdr already shows state there.
+- **⌃⌥J** jumps to what needs you: blocked (longest waiting) → finished but not visited (newest) → last finished. It focuses the pane and brings the terminal forward; press again to cycle. Nothing to do → "All quiet".
+- Same-named panes are told apart by tab (`api/2`); `herdr agent rename` wins.
 
 ## Requirements
 
@@ -24,7 +30,7 @@ sh bin/install.sh        # herdr plugin link + start
 From GitHub:
 
 ```sh
-herdr plugin install <owner>/<repo>
+herdr plugin install andresaraujo/agent-cursor
 ```
 
 Starts automatically with the herdr server.
@@ -50,10 +56,8 @@ URL scheme (registered by `bin/install.sh`):
 | `agent-cursor://focus/w6:p4` | focus that pane (ids from `run.sh status`) |
 | `agent-cursor://toggle` · `start` · `stop` | overlay on/off |
 
-leky: `action = "core.open-url"`, `args = { url = "agent-cursor://jump" }`; test with `leky action run core.open-url --args '{"url":"agent-cursor://jump"}'`.
-
 ```sh
-open agent-cursor://jump            # any launcher, leky, Raycast quicklink
+open agent-cursor://jump            # any launcher or Raycast quicklink
 sh <plugin>/bin/run.sh jump         # same, skips LaunchServices (faster)
 ```
 
@@ -69,7 +73,7 @@ Optional `~/.config/herdr/plugins/config/local.agent-cursor/config.json`:
 
 `hotkey: null` disables it. Terminal defaults to the app that launched herdr. Restart the daemon after editing (toggle twice).
 
-## Layout
+## How it works
 
 - `herdr-plugin.toml` — startup hook, toggle/status actions
 - `src/daemon.mjs` — herdr event streams + poll → state → overlay; hotkey jump
@@ -79,3 +83,7 @@ Optional `~/.config/herdr/plugins/config/local.agent-cursor/config.json`:
 - `src/prompt.mjs` — blocked-screen → reason heuristic
 - `src/ui.mjs` — overlay HTML
 - `src/herdr.mjs` — socket client
+
+## License
+
+MIT. The native overlay window is adapted from [Glimpse](https://github.com/HazAT/glimpse) (MIT, © hazat).
